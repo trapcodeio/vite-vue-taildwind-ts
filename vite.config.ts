@@ -6,15 +6,17 @@ import {XpresserVitePlugin} from "./server/plugin";
 export default defineConfig({
     plugins: [
         vue(),
-        XpresserVitePlugin((viteConfig) => {
+        XpresserVitePlugin(() => {
             return {
-                config: {
-                    paths: {base: __dirname}
+                plugins() {
+                    return {
+                        // "npm://@xpresser/ngrok": true
+                    }
                 },
-                routes(router) {
-                    router.get('/', () => "Hello World!");
+                routes(r) {
+                    r.get('/', () => "Hello World!");
                 }
             }
-        })
+        }),
     ]
 });

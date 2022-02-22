@@ -1,20 +1,23 @@
 import {DollarSign} from "xpresser/types";
 import {ResolvedConfig, Plugin} from "vite";
+import {resolve} from "path";
 
 type XpresserRouter = import("@xpresser/router");
 
-type XpresserConfig = {
-    config: Record<string, any> & {
-        name?: string;
-        env?: string;
-        paths: { base: string }
-    },
+type XpresserViteConfig = {
+    configFile?: string;
     onInit?($: DollarSign): void | any;
     routes?(router: XpresserRouter): void | any;
 }
 
+type XpresserConfig = Record<string, any> & {
+    name?: string;
+    env?: string;
+    paths: { base: string }
+}
 
-export function XpresserVitePlugin(pluginConfig: XpresserConfig | ((viteConfig: ResolvedConfig) => XpresserConfig)): Plugin {
+
+export function XpresserVitePlugin(pluginConfig: XpresserViteConfig | ((viteConfig: ResolvedConfig) => XpresserViteConfig)): Plugin {
     let viteConfig: ResolvedConfig;
 
     return {
@@ -25,7 +28,19 @@ export function XpresserVitePlugin(pluginConfig: XpresserConfig | ((viteConfig: 
 
             // if (typeof config === 'function')  resolve it
             if (typeof pluginConfig === 'function') pluginConfig = pluginConfig(viteConfig);
-            const {config, onInit, routes} = pluginConfig;
+            const {configFile, onInit, routes} = pluginConfig;
+
+            let config: XpresserConfig;
+
+            try {
+                config = require(configFile ? configFile : resolve('./xpresser.config.js')) as XpresserConfig;
+            } catch (e) {
+                throw e;
+            }
+
+
+            if (!config)
+                throw new Error(`Xpresser config not found in file: ${configFile}`);
 
             // If no env is set, use vite one.
             if (!config.env) config.env = viteConfig.env.MODE;
@@ -34,7 +49,7 @@ export function XpresserVitePlugin(pluginConfig: XpresserConfig | ((viteConfig: 
             const {init} = require('xpresser') as typeof import('xpresser');
 
             // Call init function
-            const $ = init(config, {exposeDollarSign: true});
+            const $ = init(config);
 
             // if `onInit` is a function, call it
             if (typeof onInit === 'function')
