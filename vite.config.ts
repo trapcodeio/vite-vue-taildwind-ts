@@ -8,11 +8,6 @@ export default defineConfig({
         vue(),
         XpresserVitePlugin(() => {
             return {
-                plugins() {
-                    return {
-                        // "npm://@xpresser/ngrok": true
-                    }
-                },
                 routes(r) {
                     r.get('/', () => "Hello World!");
                 }
