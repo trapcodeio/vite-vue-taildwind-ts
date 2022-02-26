@@ -8,6 +8,9 @@ export default defineConfig({
         vue(),
         XpresserVitePlugin(() => {
             return {
+                onInit($) {
+                    $.logSuccess('Xpresser Vite Plugin Initialized');
+                },
                 routes(r) {
                     r.get('/', () => "Hello World!");
                 }
